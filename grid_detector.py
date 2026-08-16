@@ -64,6 +64,21 @@ warped = cv2.warpPerspective(image, matrix, (side, side))
 
 cv2.imshow("Warped Grid", warped)
 
+cell_size = side // 9
+cells = []
+
+for row in range(9):
+  for col in range(9):
+    y1 = row * cell_size
+    y2 = y1 + cell_size
+    x1 = col * cell_size
+    x2 = x1 + cell_size
+
+    cell = warped[y1:y2, x1:x2]
+    cells.append(cell)
+
+print("Total cells extracted: ", len(cells))
+
 image_with_corners = image.copy()
 cv2.drawContours(image_with_corners, [grid_contour], -1, (0, 255, 0), 3)
 
