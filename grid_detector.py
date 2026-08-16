@@ -3,7 +3,7 @@ import numpy as np
 
 def order_corners(points):
   points = points.reshape(4,2)
-  ordered = np.zeroes((4,2), dtype="float32")
+  ordered = np.zeros((4,2), dtype="float32")
   
   sum_pts = points.sum(axis=1)
   ordered[0] = points[np.argmin(sum_pts)]
@@ -49,6 +49,20 @@ for c in contours:
       grid_contour = box
       max_area = area
 
+ordered = order_corners(grid_contour)
+
+side = 450
+destination = np.array([
+  [0,0],
+  [ side - 1, 0],
+  [ side - 1, side -1],
+  [ 0, side -1]
+], dtype="float32")
+
+matrix = cv2.getPerspectiveTransform(ordered, destination)
+warped = cv2.warpPerspective(image, matrix, (side, side))
+
+cv2.imshow("Warped Grid", warped)
 
 image_with_corners = image.copy()
 cv2.drawContours(image_with_corners, [grid_contour], -1, (0, 255, 0), 3)
