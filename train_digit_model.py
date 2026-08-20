@@ -52,3 +52,13 @@ class Net(torch.nn.Module):
 model = Net()
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+for epoch in range(0,3):
+  for images, labels in train_loader:
+    optimizer.zero_grad()
+    outputs = model(images)
+    loss = criterion(outputs, labels)
+    loss.backward()
+    optimizer.step()
+  print(f"Epoch {epoch+1}, Loss: {loss.item():.4f}")
+
