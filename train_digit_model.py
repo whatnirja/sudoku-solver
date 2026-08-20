@@ -3,27 +3,6 @@ import torchvision
 import torch.nn as nn
 from torchvision import transforms
 
-transform = transforms.ToTensor()
-
-train_dataset = torchvision.datasets.MNIST(
-  root="./data", 
-  train=True, 
-  download=True, 
-  transform=transform
-)
-test_dataset = torchvision.datasets.MNIST(
-  root="./data",
-  train=False,
-  download=True,
-  transform=transform
-)
-
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=64, shuffle=False)
-
-print("Training samples:", len(train_dataset))
-print("Test samples:", len(test_dataset))
-
 class Net(torch.nn.Module):
   def __init__(self):
     super().__init__()
@@ -49,29 +28,52 @@ class Net(torch.nn.Module):
 
     return x
 
-model = Net()
-criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+if __name__ == "__main__":
+  transform = transforms.ToTensor()
 
-for epoch in range(0,3):
-  for images, labels in train_loader:
-    optimizer.zero_grad()
-    outputs = model(images)
-    loss = criterion(outputs, labels)
-    loss.backward()
-    optimizer.step()
-  print(f"Epoch {epoch+1}, Loss: {loss.item():.4f}")
+  train_dataset = torchvision.datasets.MNIST(
+    root="./data", 
+    train=True, 
+    download=True, 
+    transform=transform
+  )
+  test_dataset = torchvision.datasets.MNIST(
+    root="./data",
+    train=False,
+    download=True,
+    transform=transform
+  )
 
-model.eval()
-correct, total = 0, 0
+  train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
+  test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=64, shuffle=False)
 
-with torch.no_grad():
-  for images, labels in test_loader:
-    outputs = model(images)
-    predicted = outputs.argmax(dim=1)
-    correct += (predicted == labels).sum().item()
-    total += labels.size(0)
-print(f"Test accuracy: {correct / total * 100:.2f}%")
+  print("Training samples:", len(train_dataset))
+  print("Test samples:", len(test_dataset))
 
-torch.save(model.state_dict(), "digit_model.pth")
-print("Model saved to digit_model.pth")
+
+  model = Net()
+  criterion = nn.CrossEntropyLoss()
+  optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+  for epoch in range(0,3):
+    for images, labels in train_loader:
+      optimizer.zero_grad()
+      outputs = model(images)
+      loss = criterion(outputs, labels)
+      loss.backward()
+      optimizer.step()
+    print(f"Epoch {epoch+1}, Loss: {loss.item():.4f}")
+
+  model.eval()
+  correct, total = 0, 0
+
+  with torch.no_grad():
+    for images, labels in test_loader:
+      outputs = model(images)
+      predicted = outputs.argmax(dim=1)
+      correct += (predicted == labels).sum().item()
+      total += labels.size(0)
+  print(f"Test accuracy: {correct / total * 100:.2f}%")
+
+  torch.save(model.state_dict(), "digit_model.pth")
+  print("Model saved to digit_model.pth")
