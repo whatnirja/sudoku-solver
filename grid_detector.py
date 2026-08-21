@@ -15,74 +15,81 @@ def order_corners(points):
 
   return ordered
 
-image = cv2.imread("test2.jpg")
+def detect_and_warp_grid(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (5,5), 0)
+    thresh = cv2.adaptiveThreshold(
+      blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2
+    )
 
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-blurred = cv2.GaussianBlur(gray, (5,5), 0)
-thresh = cv2.adaptiveThreshold(
-  blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2
-)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    grid_contour = None 
+    max_area = 0
 
-grid_contour = None 
-max_area = 0
+    for c in contours:
+      area = cv2.contourArea(c)
+      if area < 1000:
+        continue
 
-for c in contours:
-  area = cv2.contourArea(c)
-  if area < 1000:
-    continue
+      x, y, w, h = cv2.boundingRect(c)
+      aspect_ratio = w/float(h)
 
-  x, y, w, h = cv2.boundingRect(c)
-  aspect_ratio = w/float(h)
+      if not (0.9 <= aspect_ratio <= 1.1):
+        continue 
 
-  if not (0.9 <= aspect_ratio <= 1.1):
-    continue 
+      rect = cv2.minAreaRect(c)
+      box = cv2.boxPoints(rect)
+      box = np.intp(box)
 
-  rect = cv2.minAreaRect(c)
-  box = cv2.boxPoints(rect)
-  box = np.intp(box)
+      print(f"Candidate — area: {area:.0f}, aspect ratio: {aspect_ratio:.2f}")
 
-  print(f"Candidate — area: {area:.0f}, aspect ratio: {aspect_ratio:.2f}")
+      if area > max_area:
+          grid_contour = box
+          max_area = area
 
-  if area > max_area:
-      grid_contour = box
-      max_area = area
+    ordered = order_corners(grid_contour)
 
-ordered = order_corners(grid_contour)
+    side = 450
+    destination = np.array([
+      [0,0],
+      [ side - 1, 0],
+      [ side - 1, side -1],
+      [ 0, side -1]
+    ], dtype="float32")
 
-side = 450
-destination = np.array([
-  [0,0],
-  [ side - 1, 0],
-  [ side - 1, side -1],
-  [ 0, side -1]
-], dtype="float32")
+    matrix = cv2.getPerspectiveTransform(ordered, destination)
+    warped = cv2.warpPerspective(image, matrix, (side, side))
 
-matrix = cv2.getPerspectiveTransform(ordered, destination)
-warped = cv2.warpPerspective(image, matrix, (side, side))
+    image_with_corners = image.copy()
+    cv2.drawContours(image_with_corners, [grid_contour], -1, (0, 255, 0), 3)
 
-cv2.imshow("Warped Grid", warped)
+    print("Number of corners found:", len(grid_contour))
 
-cell_size = side // 9
-cells = []
+    return warped
 
-for row in range(9):
-  for col in range(9):
-    y1 = row * cell_size
-    y2 = y1 + cell_size
-    x1 = col * cell_size
-    x2 = x1 + cell_size
+def split_into_cells(warped, side=450):
+    cell_size = side // 9
+    cells = []
 
-    cell = warped[y1:y2, x1:x2]
-    cells.append(cell)
+    for row in range(9):
+      for col in range(9):
+        y1 = row * cell_size
+        y2 = y1 + cell_size
+        x1 = col * cell_size
+        x2 = x1 + cell_size
 
-print("Total cells extracted: ", len(cells))
+        cell = warped[y1:y2, x1:x2]
+        cells.append(cell)
 
-image_with_corners = image.copy()
-cv2.drawContours(image_with_corners, [grid_contour], -1, (0, 255, 0), 3)
+    print("Total cells extracted: ", len(cells))
+    return cells
 
-cv2.imshow("Sudoku image", image_with_corners)
-print("Number of corners found:", len(grid_contour))
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    image = cv2.imread("test2.jpg")
+    warped = detect_and_warp_grid(image)
+    cells = split_into_cells(warped)
+    cv2.imshow("Warped Grid", warped)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
