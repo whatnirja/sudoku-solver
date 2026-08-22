@@ -1,8 +1,6 @@
 venv/
 __pycache__/
 *.pyc
-test1.jpg
-test2.jpg
-test3.jpg
+test*.jpg
 data/
 digit_model.pth
