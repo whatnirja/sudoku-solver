@@ -71,13 +71,13 @@ def detect_and_warp_grid(image):
 def split_into_cells(warped, side=450):
     cell_size = side // 9
     cells = []
-
+    margin = 5
     for row in range(9):
       for col in range(9):
-        y1 = row * cell_size
-        y2 = y1 + cell_size
-        x1 = col * cell_size
-        x2 = x1 + cell_size
+        y1 = row * cell_size + margin
+        y2 = row * cell_size + cell_size - margin
+        x1 = col * cell_size + margin
+        x2 = col * cell_size + cell_size - margin
 
         cell = warped[y1:y2, x1:x2]
         cells.append(cell)
