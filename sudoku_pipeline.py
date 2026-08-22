@@ -37,7 +37,7 @@ model = Net()
 model.load_state_dict(torch.load("digit_model.pth"))
 model.eval()
 
-image = cv2.imread('test2.jpg')
+image = cv2.imread('test4.jpg')
 warped = detect_and_warp_grid(image)
 cells = split_into_cells(warped)
 
