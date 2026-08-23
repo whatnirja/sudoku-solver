@@ -25,10 +25,24 @@ def center_digit(cell_gray):
   new_w, new_h = int(w * scale), int(h * scale)
   digit_resized = cv2.resize(digit, (new_w, new_h))
 
+  # canvas = np.zeros((28, 28), dtype=np.uint8)
+  # x_offset = (28 - new_w) // 2
+  # y_offset = (28 - new_h) // 2
+  # canvas[y_offset:y_offset+new_h, x_offset:x_offset + new_w] = digit_resized
+
   canvas = np.zeros((28, 28), dtype=np.uint8)
   x_offset = (28 - new_w) // 2
   y_offset = (28 - new_h) // 2
-  canvas[y_offset:y_offset+new_h, x_offset:x_offset + new_w] = digit_resized
+  canvas[y_offset:y_offset+new_h, x_offset:x_offset+new_w] = digit_resized
+
+  M = cv2.moments(canvas)
+  if M["m00"] != 0:
+      cx = int(M["m10"] / M["m00"])
+      cy = int(M["m01"] / M["m00"])
+      shift_x = 14 - cx
+      shift_y = 14 - cy
+      shift_matrix = np.float32([[1, 0, shift_x], [0, 1, shift_y]])
+      canvas = cv2.warpAffine(canvas, shift_matrix, (28, 28))
 
   cv2.imshow("Cropped digit", digit)
   cv2.waitKey(0)
@@ -40,18 +54,21 @@ model = Net()
 model.load_state_dict(torch.load("digit_model.pth"))
 model.eval()
 
-image = cv2.imread('test4.jpg')
+image = cv2.imread('test2.jpg')
 
 print("Image shape:", image.shape)
 
 warped = detect_and_warp_grid(image)
 cells = split_into_cells(warped)
 
-cell = cells[0]
+cell = cells[13]
 # resized = cv2.resize(cell, (28, 28))
 # gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
 gray_full = cv2.cvtColor(cell, cv2.COLOR_BGR2GRAY)
 gray = center_digit(gray_full)
+
+print("Corner pixel (background):", gray[0][0])
+print("Center pixel (should be digit):", gray[14][14])
 
 cv2.imshow("What the model sees", gray)
 cv2.waitKey(0)
