@@ -3,13 +3,16 @@ from grid_detector import detect_and_warp_grid, split_into_cells
 import cv2
 import numpy as np
 import torch
-import torchvision
-from torchvision import transforms
-import torch.nn as nn
 
 def center_digit(cell_gray):
   _, thresh = cv2.threshold(cell_gray, 128, 255, cv2.THRESH_BINARY_INV)
   contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+  for c in contours:
+    area = cv2.contourArea(c)
+    box = cv2.boundingRect(c)
+    print("contour area: ", area)
+    print("bounding box: ", box)
 
   if not contours:
     return np.zeros((28, 28), dtype=np.uint8)
@@ -38,6 +41,9 @@ model.load_state_dict(torch.load("digit_model.pth"))
 model.eval()
 
 image = cv2.imread('test4.jpg')
+
+print("Image shape:", image.shape)
+
 warped = detect_and_warp_grid(image)
 cells = split_into_cells(warped)
 
