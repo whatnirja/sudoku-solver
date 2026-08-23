@@ -58,7 +58,6 @@ if __name__ == "__main__":
   ]
   solution = solve(test_board)
   print("board solved: ", solution)
-  print(test_board)
   print_board(test_board)
 
   
