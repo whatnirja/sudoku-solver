@@ -40,6 +40,10 @@ def find_empty(board):
         return row, col
   return None
 
+def print_board(board):
+  for i in range(9):
+    print(" ", board[i], " ")
+
 if __name__ == "__main__":
   test_board = [
     [5, 3, 0, 0, 7, 0, 0, 0, 0],
@@ -55,5 +59,6 @@ if __name__ == "__main__":
   solution = solve(test_board)
   print("board solved: ", solution)
   print(test_board)
+  print_board(test_board)
 
   
