@@ -6,6 +6,10 @@ import torch
 
 def center_digit(cell_gray):
   _, thresh = cv2.threshold(cell_gray, 128, 255, cv2.THRESH_BINARY_INV)
+
+  kernel = np.ones((2, 2), np.uint8)
+  thresh = cv2.erode(thresh, kernel, iterations=1)
+
   contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
   for c in contours:
@@ -19,7 +23,8 @@ def center_digit(cell_gray):
 
   largest = max(contours, key=cv2.contourArea)
   x, y, w, h = cv2.boundingRect(largest)
-  digit = cell_gray[y:y+h, x:x+w]
+  # digit = cell_gray[y:y+h, x:x+w]
+  digit = thresh[y:y+h, x:x+w]
 
   scale = 20.0 / max(w, h)
   new_w, new_h = int(w * scale), int(h * scale)
@@ -44,9 +49,9 @@ def center_digit(cell_gray):
       shift_matrix = np.float32([[1, 0, shift_x], [0, 1, shift_y]])
       canvas = cv2.warpAffine(canvas, shift_matrix, (28, 28))
 
-  cv2.imshow("Cropped digit", digit)
-  cv2.waitKey(0)
-  cv2.destroyAllWindows()
+  # cv2.imshow("Cropped digit", digit)
+  # cv2.waitKey(0)
+  # cv2.destroyAllWindows()
 
   return canvas
 
@@ -61,24 +66,43 @@ print("Image shape:", image.shape)
 warped = detect_and_warp_grid(image)
 cells = split_into_cells(warped)
 
-cell = cells[13]
-# resized = cv2.resize(cell, (28, 28))
-# gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
-gray_full = cv2.cvtColor(cell, cv2.COLOR_BGR2GRAY)
-gray = center_digit(gray_full)
+# cell = cells[14]
+# gray_full = cv2.cvtColor(cell, cv2.COLOR_BGR2GRAY)
+# gray = center_digit(gray_full)
 
-print("Corner pixel (background):", gray[0][0])
-print("Center pixel (should be digit):", gray[14][14])
+# print("Corner pixel (background):", gray[0][0])
+# print("Center pixel (should be digit):", gray[14][14])
 
-cv2.imshow("What the model sees", gray)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-tensor = torch.from_numpy(gray)
-tensor = tensor.float() / 255.0
-tensor = tensor.unsqueeze(0).unsqueeze(0)
+# cv2.imshow("What the model sees", gray)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+# tensor = torch.from_numpy(gray)
+# tensor = tensor.float() / 255.0
+# tensor = tensor.unsqueeze(0).unsqueeze(0)
 
-with torch.no_grad():
-  output = model(tensor)
-  predicted = output.argmax(dim=1).item()
+# print("Tensor min:", tensor.min().item(), "max:",
+#  tensor.max().item(), "mean:", tensor.mean().item())
 
-print("Predicted:", predicted)  
+
+# with torch.no_grad():
+#   output = model(tensor)
+#   predicted = output.argmax(dim=1).item()
+
+# print("Predicted:", predicted)  
+
+test_indices = [0, 1, 4, 10, 20]
+
+for idx in test_indices:
+    cell = cells[idx]
+    gray_full = cv2.cvtColor(cell, cv2.COLOR_BGR2GRAY)
+    gray = center_digit(gray_full)
+
+    tensor = torch.from_numpy(gray)
+    tensor = tensor.float() / 255.0
+    tensor = tensor.unsqueeze(0).unsqueeze(0)
+
+    with torch.no_grad():
+        output = model(tensor)
+        predicted = output.argmax(dim=1).item()
+
+    print(f"Cell {idx}: Predicted {predicted}")
