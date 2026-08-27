@@ -29,19 +29,27 @@ class Net(torch.nn.Module):
     return x
 
 if __name__ == "__main__":
-  transform = transforms.ToTensor()
+  test_transform = transforms.Compose([
+    transforms.ToTensor()
+    ])
+
+  train_transform = transforms.Compose([
+    transforms.RandomRotation(degrees=10),
+    transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
+    transforms.ToTensor()
+  ])
 
   train_dataset = torchvision.datasets.MNIST(
     root="./data", 
     train=True, 
     download=True, 
-    transform=transform
+    transform=train_transform
   )
   test_dataset = torchvision.datasets.MNIST(
     root="./data",
     train=False,
     download=True,
-    transform=transform
+    transform=test_transform
   )
 
   train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
