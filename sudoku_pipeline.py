@@ -19,7 +19,7 @@ def center_digit(cell_gray):
     print("bounding box: ", box)
 
   if not contours:
-    return np.zeros((28, 28), dtype=np.uint8)
+    return None
 
   largest = max(contours, key=cv2.contourArea)
   x, y, w, h = cv2.boundingRect(largest)
@@ -96,6 +96,10 @@ for idx in test_indices:
     cell = cells[idx]
     gray_full = cv2.cvtColor(cell, cv2.COLOR_BGR2GRAY)
     gray = center_digit(gray_full)
+
+    if gray is None:
+        print(f"Cell {idx}: blank (0)")
+        continue
 
     tensor = torch.from_numpy(gray)
     tensor = tensor.float() / 255.0
