@@ -90,7 +90,7 @@ cells = split_into_cells(warped)
 
 # print("Predicted:", predicted)  
 
-test_indices = [0, 1, 4, 10, 20]
+test_indices = range(81)
 
 for idx in test_indices:
     cell = cells[idx]
