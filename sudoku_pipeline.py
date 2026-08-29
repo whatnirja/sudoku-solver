@@ -41,7 +41,7 @@ def center_digit(cell_gray):
 
     return canvas
 
-def recognize_board(cells):
+def recognize_board(cells, model):
    board = [[0 for _ in range(9)] for _ in range(9)]
    for idx in range(81):
       row = idx // 9
@@ -66,45 +66,21 @@ def recognize_board(cells):
 
    return board
 
+if __name__ == "__main__":
+    model = Net()
+    model.load_state_dict(torch.load("digit_model.pth"))
+    model.eval()
 
-model = Net()
-model.load_state_dict(torch.load("digit_model.pth"))
-model.eval()
+    image = cv2.imread('test2.jpg')
 
-image = cv2.imread('test2.jpg')
+    print("Image shape:", image.shape)
 
-print("Image shape:", image.shape)
+    warped = detect_and_warp_grid(image)
+    cells = split_into_cells(warped)
 
-warped = detect_and_warp_grid(image)
-cells = split_into_cells(warped)
+    board_cells = recognize_board(cells, model)
+    print_board(board_cells)
 
-# cell = cells[14]
-# gray_full = cv2.cvtColor(cell, cv2.COLOR_BGR2GRAY)
-# gray = center_digit(gray_full)
-
-# print("Corner pixel (background):", gray[0][0])
-# print("Center pixel (should be digit):", gray[14][14])
-
-# cv2.imshow("What the model sees", gray)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
-# tensor = torch.from_numpy(gray)
-# tensor = tensor.float() / 255.0
-# tensor = tensor.unsqueeze(0).unsqueeze(0)
-
-# print("Tensor min:", tensor.min().item(), "max:",
-#  tensor.max().item(), "mean:", tensor.mean().item())
-
-
-# with torch.no_grad():
-#   output = model(tensor)
-#   predicted = output.argmax(dim=1).item()
-
-# print("Predicted:", predicted)  
-
-board_cells = recognize_board(cells)
-print_board(board_cells)
-
-solved = solve(board_cells)
-print("Solved: ", solved)
-print_board(board_cells)
+    solved = solve(board_cells)
+    print("Solved: ", solved)
+    print_board(board_cells)

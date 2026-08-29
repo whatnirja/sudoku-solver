@@ -1,7 +1,17 @@
 import cv2
+import torch
 from grid_detector import order_corners, detect_and_warp_grid, split_into_cells
+from sudoku_pipeline import recognize_board
+from solver import solve, is_board_valid
+from train_digit_model import Net
 
 cap = cv2.VideoCapture(0)
+counter = 0
+solved = None
+
+model = Net()
+model.load_state_dict(torch.load("digit_model.pth"))
+model.eval()
 
 while True:
   ret, frame = cap.read()
@@ -9,6 +19,23 @@ while True:
     break
 
   warped, grid_contour = detect_and_warp_grid(frame)
+
+  if warped is not None:
+    counter += 1
+  else:
+    counter = 0
+    solved = None
+
+  if counter == 15 and solved is None:
+    cells = split_into_cells(warped)
+    board = recognize_board(cells, model)
+    if is_board_valid(board):
+      print("About to solve board:", board)
+      solve(board)
+      solved = board
+    else: 
+      solved = None
+
   if warped is None:
     cv2.imshow("feed", frame)
   else: 

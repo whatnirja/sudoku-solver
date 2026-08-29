@@ -33,6 +33,19 @@ def is_valid(board, row, col, num):
   
   return True
 
+def is_board_valid(board):
+  for row in range(9):
+    for col in range(9):
+      if board[row][col] != 0:
+        num = board[row][col]
+        board[row][col] = 0
+        if is_valid(board, row, col, num):
+          board[row][col] = num
+        else:
+          board[row][col] = num
+          return False
+  return True
+
 def find_empty(board):
   for row in range(9):
     for col in range(9):
