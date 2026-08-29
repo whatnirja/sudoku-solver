@@ -53,7 +53,7 @@ def detect_and_warp_grid(image):
           max_area = area
 
     if grid_contour is None:
-       return None
+       return None, None
 
     ordered = order_corners(grid_contour)
 
@@ -73,7 +73,7 @@ def detect_and_warp_grid(image):
 
     # print("Number of corners found:", len(grid_contour))
 
-    return warped
+    return warped, grid_contour
 
 def split_into_cells(warped, side=450):
     cell_size = side // 9

@@ -8,12 +8,12 @@ while True:
   if not ret:
     break
 
-  warped = detect_and_warp_grid(frame)
+  warped, grid_contour = detect_and_warp_grid(frame)
   if warped is None:
     cv2.imshow("feed", frame)
   else: 
-    cv2.imshow("feed", warped)
-
+    cv2.drawContours(frame, [grid_contour], -1, (0, 255, 0), 3)
+    cv2.imshow("feed", frame)
   if cv2.waitKey(1) & 0xFF == ord('q'):
     break
 
