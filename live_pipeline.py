@@ -7,7 +7,13 @@ while True:
   ret, frame = cap.read()
   if not ret:
     break
-  cv2.imshow("Webcam", frame)
+
+  warped = detect_and_warp_grid(frame)
+  if warped is None:
+    cv2.imshow("feed", frame)
+  else: 
+    cv2.imshow("feed", warped)
+
   if cv2.waitKey(1) & 0xFF == ord('q'):
     break
 

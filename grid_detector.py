@@ -26,11 +26,15 @@ def detect_and_warp_grid(image):
 
     grid_contour = None 
     max_area = 0
+    height, width, channels = image.shape
+    total_area = height * width
 
     for c in contours:
       area = cv2.contourArea(c)
-      if area < 1000:
-        continue
+      # if area < 1000:
+      #   continue
+      if area < total_area * 0.1:
+         continue
 
       x, y, w, h = cv2.boundingRect(c)
       aspect_ratio = w/float(h)
@@ -42,11 +46,14 @@ def detect_and_warp_grid(image):
       box = cv2.boxPoints(rect)
       box = np.intp(box)
 
-      print(f"Candidate — area: {area:.0f}, aspect ratio: {aspect_ratio:.2f}")
+      # print(f"Candidate — area: {area:.0f}, aspect ratio: {aspect_ratio:.2f}")
 
       if area > max_area:
           grid_contour = box
           max_area = area
+
+    if grid_contour is None:
+       return None
 
     ordered = order_corners(grid_contour)
 
@@ -64,7 +71,7 @@ def detect_and_warp_grid(image):
     image_with_corners = image.copy()
     cv2.drawContours(image_with_corners, [grid_contour], -1, (0, 255, 0), 3)
 
-    print("Number of corners found:", len(grid_contour))
+    # print("Number of corners found:", len(grid_contour))
 
     return warped
 
