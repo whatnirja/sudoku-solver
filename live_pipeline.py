@@ -26,7 +26,9 @@ while True:
     counter = 0
     solved = None
 
-  if counter == 15 and solved is None:
+  print("Counter:", counter)
+
+  if counter == 35 and solved is None:
     cells = split_into_cells(warped)
     board = recognize_board(cells, model)
     if is_board_valid(board):
@@ -34,6 +36,7 @@ while True:
       solve(board)
       solved = board
     else: 
+      print("Board is invalid, skipping:", board)
       solved = None
 
   if warped is None:

@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 def center_digit(cell_gray):
-    _, thresh = cv2.threshold(cell_gray, 128, 255, cv2.THRESH_BINARY_INV)
+    thresh = cv2.adaptiveThreshold(cell_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
 
     kernel = np.ones((2, 2), np.uint8)
     thresh = cv2.erode(thresh, kernel, iterations=1)
@@ -19,6 +19,8 @@ def center_digit(cell_gray):
 
     largest = max(contours, key=cv2.contourArea)
     x, y, w, h = cv2.boundingRect(largest)
+    if w < 5 or h < 5:
+        return None
     digit = thresh[y:y+h, x:x+w]
 
     scale = 20.0 / max(w, h)
