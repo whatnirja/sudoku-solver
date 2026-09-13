@@ -73,4 +73,20 @@ if __name__ == "__main__":
   print("board solved: ", solution)
   print_board(test_board)
 
+from collections import Counter
+
+def combine_boards(boards_list):
+  result = [ [0 for _ in range(9)] for _ in range(9)] 
+  for row in range(9):
+    for col in range(9):
+      votes = []
+      for board in boards_list:
+        votes.append(board[row][col])
+
+      most_common_value = Counter(votes).most_common(1)[0][0]
+      result[row][col] = most_common_value
+      
+  return result
+
+
   
