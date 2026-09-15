@@ -45,6 +45,8 @@ def center_digit(cell_gray):
 
 def recognize_board(cells, model):
    board = [[0 for _ in range(9)] for _ in range(9)]
+   #debugging incorrect board format
+   confidence_board = [[0 for _ in range(9)] for _ in range(9)]
    for idx in range(81):
       row = idx // 9
       col = idx % 9   
@@ -63,10 +65,15 @@ def recognize_board(cells, model):
 
       with torch.no_grad():
          output = model(tensor)
-         predicted = output.argmax(dim=1).item()
-         board[row][col] = predicted
+        #  predicted = output.argmax(dim=1).item()
+        #  board[row][col] = predicted
+         top2 = output.topk(2, dim=1)
+         best = top2.indices[0][0].item()
+         second = top2.indices[0][1].item()
+         board[row][col] = best
+         confidence_board[row][col] = second
 
-   return board
+   return board, confidence_board
 
 if __name__ == "__main__":
     model = Net()
@@ -77,11 +84,13 @@ if __name__ == "__main__":
 
     print("Image shape:", image.shape)
 
-    warped = detect_and_warp_grid(image)
+    warped, grid_contour = detect_and_warp_grid(image)
     cells = split_into_cells(warped)
 
-    board_cells = recognize_board(cells, model)
+    # board_cells = recognize_board(cells, model)
+    board_cells, confidence_cells = recognize_board(cells, model)
     print_board(board_cells)
+    print_board(confidence_cells)
 
     solved = solve(board_cells)
     print("Solved: ", solved)
