@@ -57,5 +57,6 @@ if __name__ == "__main__":
   print_board(repaired_board)
 
   if solved:
-      solve(repaired_board)
-      print_board(repaired_board)
+    fully_solved = solve(repaired_board)
+    print("Fully solved:", fully_solved)
+    print_board(repaired_board)

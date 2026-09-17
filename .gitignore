@@ -4,3 +4,4 @@ __pycache__/
 test*.jpg
 data/
 digit_model.pth
+printed_digits/printed_digits/
