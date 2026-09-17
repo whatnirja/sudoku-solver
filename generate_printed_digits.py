@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import os
 import random
 
@@ -38,6 +38,11 @@ for digit in range(10):
       image = image.rotate(angle, fillcolor=0)
 
       save_path = os.path.join(digit_dir, f"{font_name}_{i}.png")
+
+      if random.random() < 0.5:
+        blur_radius = random.uniform(0.3, 1.0)
+        image = image.filter(ImageFilter.GaussianBlur(blur_radius))
+
       image.save(save_path)
 
 print("Done generating printed digits.")

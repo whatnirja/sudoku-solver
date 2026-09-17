@@ -24,39 +24,53 @@ while True:
 
   warped, grid_contour = detect_and_warp_grid(frame)
 
+  # if warped is not None:
+  #   counter += 1
+  #   if counter >= 35 and len(boards_collected) < 5:
+  #     cells = split_into_cells(warped)
+  #     board, confidence_board = recognize_board(cells, model)
+  #     boards_collected.append(board)
+  #     confidence_boards_collected.append(confidence_board)
+  #     print("Boards collected so far:", len(boards_collected))
+  # else:
+  #   counter = 0
+  #   solved = None
+  #   boards_collected = []
+  #   confidence_boards_collected = []
   if warped is not None:
     counter += 1
-    if counter >= 35 and len(boards_collected) < 5:
+    if counter >= 35 and solved is None:
       cells = split_into_cells(warped)
       board, confidence_board = recognize_board(cells, model)
-      boards_collected.append(board)
-      confidence_boards_collected.append(confidence_board)
-      print("Boards collected so far:", len(boards_collected))
+      if is_board_valid(board):
+        solve(board)
+        solved = board
+        print("Solved:", board)
+      else:
+        print("Invalid single frame:", board)
   else:
     counter = 0
     solved = None
-    boards_collected = []
-    confidence_boards_collected = []
 
-  if len(boards_collected) == 5 and solved is None:
-    combined = combine_boards(boards_collected)
-    combined_confidence = combine_boards(confidence_boards_collected)
+  # if len(boards_collected) == 5 and solved is None:
+  #   combined = combine_boards(boards_collected)
+  #   combined_confidence = combine_boards(confidence_boards_collected)
 
-    print("Combined board:", combined)
-    print("Combined confidence board:", combined_confidence)
-    if is_board_valid(combined):
-      solve(combined)
-      solved = combined
-    else:
-      repaired, fixed = repair_board(combined, combined_confidence)
-      if fixed:
-        solve(repaired)
-        solved = repaired
-      else:
-        boards_collected = []
-        confidence_boards_collected = []
+  #   print("Combined board:", combined)
+  #   print("Combined confidence board:", combined_confidence)
+  #   if is_board_valid(combined):
+  #     solve(combined)
+  #     solved = combined
+  #   else:
+  #     repaired, fixed = repair_board(combined, combined_confidence)
+  #     if fixed:
+  #       solve(repaired)
+  #       solved = repaired
+  #     else:
+  #       boards_collected = []
+  #       confidence_boards_collected = []
 
-  print("Counter:", counter)
+  # print("Counter:", counter)
 
   if warped is None:
     cv2.imshow("feed", frame)
