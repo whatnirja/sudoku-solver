@@ -46,7 +46,7 @@ if __name__ == "__main__":
   model.load_state_dict(torch.load("digit_model.pth"))
   model.eval()
 
-  warped, grid_contour = detect_and_warp_grid(image)
+  warped, grid_contour, matrix = detect_and_warp_grid(image)
   cells = split_into_cells(warped)
 
   board, confidence_board = recognize_board(cells, model)

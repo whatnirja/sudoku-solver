@@ -22,7 +22,7 @@ while True:
   if not ret:
     break
 
-  warped, grid_contour = detect_and_warp_grid(frame)
+  warped, grid_contour, matrix = detect_and_warp_grid(frame)
 
   # if warped is not None:
   #   counter += 1
@@ -43,9 +43,9 @@ while True:
       cells = split_into_cells(warped)
       board, confidence_board = recognize_board(cells, model)
       if is_board_valid(board):
-        solve(board)
-        solved = board
-        print("Solved:", board)
+        if solve(board):
+          solved = board
+          print("Solved:", board)
       if solved is not None:
         print("=" * 20)
         print("solved!!")
