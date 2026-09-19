@@ -89,7 +89,7 @@ def split_into_cells(warped, side=450):
         cell = warped[y1:y2, x1:x2]
         cells.append(cell)
 
-    print("Total cells extracted: ", len(cells))
+    # print("Total cells extracted: ", len(cells))
     return cells
 
 

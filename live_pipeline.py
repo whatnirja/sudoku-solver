@@ -46,8 +46,15 @@ while True:
         solve(board)
         solved = board
         print("Solved:", board)
-      else:
-        print("Invalid single frame:", board)
+      if solved is not None:
+        print("=" * 20)
+        print("solved!!")
+        for row in solved:
+          print(row)
+        print("=" * 20)
+        break
+      # else:
+      #   print("Invalid single frame:", board)
   else:
     counter = 0
     solved = None
