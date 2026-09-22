@@ -66,7 +66,7 @@ while True:
                 digit = str(solved[row][col])
                 x = col * cell_size + 15
                 y = row * cell_size + 35
-                cv2.putText(canvas, digit, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                cv2.putText(canvas, digit, (x, y), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 255, 0), 2)
   else:
     counter = 0
     frames_since_good_matrix += 1
