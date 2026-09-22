@@ -19,10 +19,10 @@ A real-time Sudoku solver that reads a puzzle through a webcam and overlays the 
 ## Key Technical Challenges
 
 **MNIST didn't generalize to printed puzzles.**
-The digit-recognition model was initially trained on MNIST, but MNIST is handwritten digits — its stroke shape, thickness, and style don't match the clean printed fonts on an actual Sudoku puzzle. This caused systematic misreads on real camera input. The fix: generate a synthetic dataset of printed digits (multiple system fonts, randomized rotation, affine transforms, and motion-blur simulation via PIL), then train on a combined MNIST + synthetic-printed dataset. This brought recognition accuracy to ~98.5% on real photographed digits.
+The digit-recognition model was initially trained on MNIST, but since MNIST is handwritten digits, its stroke shape, thickness, and style don't match the clean printed fonts on an actual Sudoku puzzle. This caused systematic misreads on real camera input. **The fix:** generate a synthetic dataset of printed digits (multiple system fonts, randomized rotation, affine transforms, and motion-blur simulation via PIL), then train on a combined MNIST + synthetic-printed dataset. This brought recognition accuracy to ~98.5% (!!!) on real photographed digits.
 
 **Keeping the overlay locked to the grid during camera movement.**
-The solved-digit overlay is computed by inverse-warping a solution canvas using that frame's perspective transform. Early versions recomputed this only once, causing the overlay to drift out of alignment as soon as the camera moved. The fix was to recompute the inverse warp every frame using the current frame's transform — and to handle frames where grid detection briefly fails (e.g. during motion blur) by falling back to the last successfully detected transform for a short grace period, instead of dropping the overlay outright. This keeps the solution visually locked onto the physical grid, with brief, graceful tolerance for detection gaps rather than hard flicker.
+The solved-digit overlay is computed by inverse-warping a solution canvas using that frame's perspective transform. Early versions recomputed this only once, causing the overlay to drift out of alignment as soon as the camera moved. The fix was to recompute the inverse warp every frame using the current frame's transform, and to handle frames where grid detection briefly fails (e.g. during motion blur) by falling back to the last successfully detected transform for a short grace period, instead of dropping the overlay outright. This keeps the solution visually locked onto the physical grid, with brief, graceful tolerance for detection gaps rather than hard flicker.
 
 ## Pipeline Files
 
@@ -42,3 +42,10 @@ python live_pipeline.py
 ```
 
 Hold a Sudoku puzzle up to your webcam. Once the grid is detected and held steady, the board is recognized and solved automatically, with the solution overlaid live in green.
+
+## Next Steps
+
+- **Test against harder puzzles** — so far this has mainly been validated on a standard-difficulty puzzle; haven't yet stress-tested against puzzles with more blank cells, unusual fonts, or trickier photo conditions (glare, angle, low light).
+- **Improve robustness under harder framing** — recognition currently sometimes needs several dozen attempts under difficult lighting/angles before landing on a valid board; want to tighten this up.
+- **Make it more user-friendly** — right now it's a raw OpenCV window controlled via keyboard; eventually want clearer on-screen guidance (e.g. "hold steady," "align grid") and a simpler way to start/reset.
+- **Code cleanup** — remove leftover experimental code (an earlier multi-frame-voting/board-repair approach that was replaced by the current single-frame-trigger method) once fully confident in the current approach.
